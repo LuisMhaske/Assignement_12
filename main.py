@@ -60,12 +60,13 @@ def modify_file(source_file, destination_file, changes):
 
     if source_ext == '.csv':
         reader = CSVReader(source_file)
+        file_data = reader.read()
     elif source_ext == '.json':
-        reader = JSONReader(source_file)
+        with open(source_file, 'r') as json_file:
+            file_data = json.load(json_file)
     elif source_ext == '.pickle':
-        reader = PickleReader(source_file)
-
-    file_data = reader.read()
+        with open(source_file, 'rb') as pickle_file:
+            file_data = pickle.load(pickle_file)
 
     if file_data is None:
         return  # Exit if there's an issue reading the file
@@ -78,7 +79,16 @@ def modify_file(source_file, destination_file, changes):
         except ValueError:
             print(f"Invalid change format: {change}")
 
-    reader.save(file_data)
+    if dest_ext == '.csv':
+        reader = CSVReader(destination_file)
+        reader.save(file_data)
+    elif dest_ext == '.json':
+        with open(destination_file, 'w') as json_file:
+            json.dump(file_data, json_file, indent=2)
+    elif dest_ext == '.pickle':
+        with open(destination_file, 'wb') as pickle_file:
+            pickle.dump(file_data, pickle_file)
+
     print(f"File successfully modified and saved to {destination_file}")
 
 
